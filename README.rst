@@ -8,7 +8,7 @@ installing
 
 Just use the pip ::
 
-$ pip install halonadm
+$ sudo pip install halonadm
 
 configuration
 ===============
