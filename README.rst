@@ -102,3 +102,8 @@ view
     X-Mailer: swaks v20100211.0 jetmore.org/john/code/swaks/
 
     This is a test mailing
+
+requirements
+===============
+
+* suds (python2) or suds-jurko (python3)
