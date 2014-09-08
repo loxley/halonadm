@@ -8,7 +8,9 @@ installing
 
 Just use the pip ::
 
-$ sudo pip install halonadm
+  $ sudo pip install halonadm
+
+Archlinux package available in the AUR as halonadm.
 
 configuration
 ===============
