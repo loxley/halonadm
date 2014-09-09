@@ -318,38 +318,48 @@ def display_mailq(args, data):
     print("\033[1m%-36s %-17s %s\033[0m" % (
         'msgid', 'arrival time', 'sender/recipient'))
     num = 0
-    for msgts0 in sorted(data, reverse=True):
-        for res in data[msgts0]:
-            num += 1
-            msgerror = None
-            msgsubject = base64.b64decode(res['msgsubject']).decode('utf-8')
-            msgfrom = res['msgfrom']
-            msgto = res['msgto']
-            msgpath = res['msgpath']
-            msgscore = res['msgscore']
-            if 'msgerror' in res and res['msgerror'] is not None:
-                msgerror = base64.b64decode(res['msgerror']).decode('utf-8')
-            print("%-36s %17s %s" % (str(res['msgid']),
-                                     getdatetime(msgts0),
-                                     msgfrom))
-            print("%54s %s" % (' ', msgto))
-            if args.verbose:
-                if msgscore:
-                    print("%54s  ├───score: SA=%s" % (
-                        ' ', res['msgscore']['item'][0]['second'].split(
-                            '|')[0]))
-                print("%54s  ├──server: %s" % (' ', res['server']))
+    try:
+        for msgts0 in sorted(data, reverse=True):
+            for res in data[msgts0]:
+                num += 1
+                msgerror = None
+                msgsubject = base64.b64decode(res['msgsubject']).decode('utf-8')
+                msgfrom = res['msgfrom']
+                msgto = res['msgto']
+                msgpath = res['msgpath']
+                msgscore = res['msgscore']
+                if 'msgerror' in res and res['msgerror'] is not None:
+                    msgerror = base64.b64decode(res['msgerror']).decode('utf-8')
+                print("%-36s %17s %s" % (str(res['msgid']),
+                                         getdatetime(msgts0),
+                                         msgfrom))
+                print("%54s %s" % (' ', msgto))
+                if args.verbose:
+                    if msgscore:
+                        print("%54s  ├───score: SA=%s" % (
+                            ' ', res['msgscore']['item'][0]['second'].split(
+                                '|')[0]))
+                    print("%54s  ├──server: %s" % (' ', res['server']))
+                    if msgerror:
+                        print("%54s  ├─subject: %s" % (' ', msgsubject))
+                        if msgpath:
+                            print("%54s  ├─msgpath: %s" % (' ', msgpath))
+                    else:
+                        print("%54s  └─subject: %s" % (' ', msgsubject))
                 if msgerror:
-                    print("%54s  ├─subject: %s" % (' ', msgsubject))
-                    if msgpath:
-                        print("%54s  ├─msgpath: %s" % (' ', msgpath))
-                else:
-                    print("%54s  └─subject: %s" % (' ', msgsubject))
-            if msgerror:
-                print("%54s  └───error: %s" % (' ', msgerror))
-            print('')
-        if num == args.numdomains:
-            break
+                    print("%54s  └───error: %s" % (' ', msgerror))
+                print('')
+            if num == args.numdomains:
+                break
+    except IOError as exc:
+        try:
+            sys.stdout.close()
+        except IOError:
+            pass
+        try:
+            sys.stderr.close()
+        except IOError:
+            pass
     print("-- \033[1m%d\033[0m/\033[1m%d\033[0m Requests." % (
         num, sum(len(v) for v in data.values())))
 
