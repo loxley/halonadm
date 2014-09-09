@@ -11,7 +11,7 @@ from suds.transport.https import HttpAuthenticated # TransportError
 from suds.sudsobject import asdict
 from collections import Counter
 from time import time, localtime, strftime
-from pkg_resources import Requirement, resource_filename
+from pkg_resources import Requirement, resource_filename, DistributionNotFound
 import os
 import argparse
 import base64
@@ -281,7 +281,8 @@ def display_qshape(args, stats):
                  total_1280, total_older])
     #print("-" * 105)
     for num, domain in enumerate(sorted(
-            stats, key=lambda k: len(stats[k]['total']), reverse=True), start=1):
+            stats, key=lambda k: len(stats[k]['total']),
+            reverse=True), start=1):
         if num <= args.numdomains:
             domain_total = str(len(stats[domain]['total']))
             domain_5 = str(len(stats[domain]['5']))
@@ -323,13 +324,15 @@ def display_mailq(args, data):
             for res in data[msgts0]:
                 num += 1
                 msgerror = None
-                msgsubject = base64.b64decode(res['msgsubject']).decode('utf-8')
+                msgsubject = base64.b64decode(
+                    res['msgsubject']).decode('utf-8')
                 msgfrom = res['msgfrom']
                 msgto = res['msgto']
                 msgpath = res['msgpath']
                 msgscore = res['msgscore']
                 if 'msgerror' in res and res['msgerror'] is not None:
-                    msgerror = base64.b64decode(res['msgerror']).decode('utf-8')
+                    msgerror = base64.b64decode(
+                        res['msgerror']).decode('utf-8')
                 print("%-36s %17s %s" % (str(res['msgid']),
                                          getdatetime(msgts0),
                                          msgfrom))
@@ -371,15 +374,20 @@ def setupconfig():
                          config_path + ".config" + os.sep + "halonadm" +
                          os.sep + "halonadm.conf",
                          os.sep + "etc" + os.sep + "halonadm.conf",
-                         "halonadm.conf"]
-    config_orig = resource_filename(Requirement.parse("halonadm"),
-                                    "halonadm/halonadm.conf")
+                         os.getcwd() + os.sep + "halonadm.conf"]
+    config_orig = None
+    try:
+        config_orig = resource_filename(Requirement.parse("halonadm"),
+                                        "halonadm/halonadm.conf")
+    except DistributionNotFound:
+        pass
     config = configparser.SafeConfigParser()
     found = config.read(config_candidates)
     if not found:
         print("Found no configfiles in: " +
-              " or ".join([configfile for configfile in config_candidates]))
-        print("Copy skelton from " + config_orig)
+              ", ".join([configfile for configfile in config_candidates]))
+        if config_orig:
+            print("Copy skelton from " + config_orig)
         exit(1)
 
     parser = argparse.ArgumentParser()
